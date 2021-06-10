@@ -1,16 +1,17 @@
 import json
-from math import e
+import time
 
 import dask.dataframe as dd
 from dask.distributed import Client
 from fastapi import FastAPI
+from pandas.core.frame import DataFrame
 
 DASK_CLUSTER = "localhost:8786"
 
 app = FastAPI()
 
 
-async def get_data(country):
+async def get_data(country) -> DataFrame:
     async with Client(DASK_CLUSTER, asynchronous=True) as client:
         path = "data/*.parquet"
         predicates = [
@@ -37,6 +38,10 @@ async def read_root():
 
 @app.get("/data/{country}")
 async def read_data(country: str):
+    begin = time.time()
     result = await get_data(country)
     parsed = json.loads(result.to_json(orient="records"))
-    return {"result": parsed}
+    return {
+        "time(secs)": (time.time() - begin),
+        "result": parsed,
+    }
