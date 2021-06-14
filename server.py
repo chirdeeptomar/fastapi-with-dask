@@ -1,34 +1,27 @@
 import json
 import time
+from typing import Optional
 
-import dask.dataframe as dd
-from dask.distributed import Client
+import pandas as pd
 from fastapi import FastAPI
-from pandas.core.frame import DataFrame
+from fastapi.middleware.cors import CORSMiddleware
 
-DASK_CLUSTER = "localhost:8786"
+from data_access import get_data, get_data_for_pie
 
 app = FastAPI()
 
+origins = [
+    "http://localhost",
+    "http://localhost:3000",
+]
 
-async def get_data(country) -> DataFrame:
-    async with Client(DASK_CLUSTER, asynchronous=True) as client:
-        path = "data/*.parquet"
-        predicates = [
-            ("country", "==", str.capitalize(country)),
-        ]
-        columns = [
-            "id",
-            "first_name",
-            "last_name",
-            "country",
-        ]
-
-        df = dd.read_parquet(
-            path, engine="pyarrow-dataset", columns=columns, filters=predicates
-        )
-        future = client.compute(df)
-        return await future
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["GET"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")
@@ -37,10 +30,21 @@ async def read_root():
 
 
 @app.get("/data/{country}")
-async def read_data(country: str):
+async def read_data(country: Optional[str] = None):
     begin = time.time()
     result = await get_data(country)
     parsed = json.loads(result.to_json(orient="records"))
+    return {
+        "time(secs)": (time.time() - begin),
+        "result": parsed,
+    }
+
+
+@app.get("/pie")
+async def make_pie():
+    begin = time.time()
+    result = await get_data_for_pie()
+    parsed = json.loads(result.to_json())
     return {
         "time(secs)": (time.time() - begin),
         "result": parsed,
