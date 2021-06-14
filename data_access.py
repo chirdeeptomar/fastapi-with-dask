@@ -48,6 +48,7 @@ async def get_data(country: Optional[str] = None) -> pd.core.frame.DataFrame:
 
 
 async def get_data_for_pie() -> pd.core.frame.DataFrame:
+    TOP_N = 10
     async with Client(DASK_CLUSTER, asynchronous=True) as client:
         path = "data/*.parquet"
 
@@ -56,7 +57,7 @@ async def get_data_for_pie() -> pd.core.frame.DataFrame:
             engine="pyarrow-dataset",
         )
         grouped_df = df["country"].value_counts().to_frame()
-        result = await client.compute(grouped_df)
+        result = (await client.compute(grouped_df)).head(TOP_N)
         countries = result.index.to_frame()
         result.merge(countries, how="cross")
-        return result.head(10)
+        return result

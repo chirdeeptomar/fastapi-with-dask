@@ -24,37 +24,36 @@ export default class App extends React.Component {
       const counts = Object.values(this.state.stats)
 
       return (
-        <Plot
-          data={
-            [{
-              y: counts,
-              x: countries,
-              type: 'scatter'
-            }]
-          }
-          layout={{
-            title: 'A Fancy Plot',
-            height: 400,
-            width: 800
-          }}
-        />
-      );
-
-      return (
-        <Plot
-          data={
-            [{
-              values: counts,
-              labels: countries,
-              type: 'pie'
-            }]
-          }
-          layout={{
-            title: 'A Fancy Plot',
-            height: 400,
-            width: 800
-          }}
-        />
+        <div>
+          <Plot
+            data={
+              [{
+                y: counts,
+                x: countries,
+                type: 'scatter'
+              }]
+            }
+            layout={{
+              title: 'Scatter Plot',
+              height: 400,
+              width: 800
+            }}
+          />
+          <Plot
+            data={
+              [{
+                values: counts,
+                labels: countries,
+                type: 'pie'
+              }]
+            }
+            layout={{
+              title: 'Pie Chart',
+              height: 400,
+              width: 800
+            }}
+          />
+        </div>
       );
     } else {
       <p>Loading....</p>
