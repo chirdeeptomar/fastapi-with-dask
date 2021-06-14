@@ -5,7 +5,7 @@ from typing import Optional
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from data_access import get_data, get_data_for_pie
+from data_access import get_data, get_data_for_pie, get_salary_data
 
 app = FastAPI()
 
@@ -40,9 +40,20 @@ async def read_data(country: Optional[str] = None):
 
 
 @app.get("/pie")
+async def make_pie(field: Optional[str] = "country"):
+    begin = time.time()
+    result = await get_data_for_pie(field)
+    parsed = json.loads(result.to_json())
+    return {
+        "time(secs)": (time.time() - begin),
+        "result": parsed,
+    }
+
+
+@app.get("/salary-distribution")
 async def make_pie():
     begin = time.time()
-    result = await get_data_for_pie()
+    result = await get_salary_data()
     parsed = json.loads(result.to_json())
     return {
         "time(secs)": (time.time() - begin),
