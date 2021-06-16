@@ -7,7 +7,7 @@ from dask.distributed import Client, Future
 DASK_CLUSTER = "localhost:8786"
 
 
-async def get_data(country: Optional[str] = None) -> pd.core.frame.DataFrame:
+async def get_data(country: Optional[str] = None) -> pd.DataFrame:
     async with Client(DASK_CLUSTER, asynchronous=True) as client:
         path = "data/*.parquet"
         if country is not None:
@@ -47,7 +47,7 @@ async def get_data(country: Optional[str] = None) -> pd.core.frame.DataFrame:
         return await future
 
 
-async def get_data_for_pie(group_by) -> pd.core.frame.DataFrame:
+async def get_data_for_pie(group_by: str) -> pd.DataFrame:
     TOP_N = 10
     async with Client(DASK_CLUSTER, asynchronous=True) as client:
         path = "data/*.parquet"
@@ -63,7 +63,7 @@ async def get_data_for_pie(group_by) -> pd.core.frame.DataFrame:
         return result
 
 
-async def get_salary_data() -> pd.core.frame.DataFrame:
+async def get_salary_data() -> pd.DataFrame:
     async with Client(DASK_CLUSTER, asynchronous=True) as client:
         path = "data/*.parquet"
 
